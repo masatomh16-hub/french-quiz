@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>フランス語単語 & 数字マスターテスト</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+body {
+    font-family: 'Noto Sans JP', 'Poppins', sans-serif;
+}
+.french-font {
+    font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+}
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+<header class="bg-indigo-600 text-white shadow-md">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <i class="fa-solid font-bold text-2xl fa-language"></i>
+            <h1 class="text-xl font-bold tracking-wide">フランス語単語 & 数字テスト</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleHistoryModal(true)" class="text-xs md:text-sm bg-indigo-700 hover:bg-indigo-800 text-white font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-line"></i> <span class="hidden sm:inline">学習履歴</span>
+            </button>
+            <button id="home-btn" onclick="goToHome()" class="hidden text-xs md:text-sm bg-indigo-700 hover:bg-indigo-800 text-white font-medium px-3 py-1.5 rounded-lg transition items-center gap-1.5">
+                <i class="fa-solid fa-house"></i> トップへ
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="flex-grow max-w-4xl w-full mx-auto p-4 md:p-6">
+    <!-- Top / Config Screen -->
+    <section id="config-screen" class="space-y-6 transition-all">
+        <!-- Dashboard Summary Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-day text-indigo-500"></i> 本日の分野別最高成績
+                </h3>
+                <button onclick="toggleHistoryModal(true)" class="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1">
+                    全履歴を見る <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            </div>
+            <div id="today-bests-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                <!-- Dynamic Generation of Today's Best Scores -->
+            </div>
+        </div>
+
+        <!-- Weak Points Summary Banner -->
+        <div id="weak-summary-banner" class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center font-bold text-lg shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-slate-800 text-sm">苦手登録（2回以上ミス）: <span id="weak-count-badge" class="text-amber-600 font-extrabold text-base">0</span> 件</div>
+                    <div class="text-xs text-slate-500">何度も間違えている単語や数字が集計されています</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="startWeakPointsQuiz()" id="weak-start-btn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    苦手克服モード
+                </button>
+                <button onclick="toggleWeakModal(true)" class="bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-xs px-3 py-2.5 rounded-xl transition">
+                    一覧表示
+                </button>
+            </div>
+        </div>
+
+        <!-- Config Form -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div class="text-center mb-8">
+                <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">Français Test</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">単語テスト設定</h2>
+                <p class="text-slate-500 text-sm mt-1">出題モード、選択肢の数、問題数を選択してテストを開始しましょう</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Mode Selection -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-3"><i class="fa-solid fa-sliders text-indigo-500 mr-2"></i>問題形式を選択</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="mode-selector">
+                        <button type="button" onclick="selectMode('fr-ja')" class="mode-btn border-2 border-indigo-600 bg-indigo-50/50 p-4 rounded-xl text-left hover:border-indigo-600 transition flex items-start gap-3" data-mode="fr-ja">
+                            <div class="bg-indigo-600 text-white p-2.5 rounded-lg shrink-0 mt-0.5"><i class="fa-solid fa-a"></i></div>
+                            <div>
+                                <div class="font-bold text-slate-800">1. フランス語 → 日本語</div>
+                                <div class="text-xs text-slate-500 mt-1">フランス語から正しい日本語訳を選択</div>
+                            </div>
+                        </button>
+                        <button type="button" onclick="selectMode('ja-fr')" class="mode-btn border-2 border-slate-200 p-4 rounded-xl text-left hover:border-indigo-400 transition flex items-start gap-3" data-mode="ja-fr">
+                            <div class="bg-slate-100 text-slate-600 p-2.5 rounded-lg shrink-0 mt-0.5"><i class="fa-solid fa-font"></i></div>
+                            <div>
+                                <div class="font-bold text-slate-800">2. 日本語 → フランス語</div>
+                                <div class="text-xs text-slate-500 mt-1">日本語から正しいフランス語を選択</div>
+                            </div>
+                        </button>
+                        <button type="button" onclick="selectMode('article')" class="mode-btn border-2 border-slate-200 p-4 rounded-xl text-left hover:border-indigo-400 transition flex items-start gap-3" data-mode="article">
+                            <div class="bg-slate-100 text-slate-600 p-2.5 rounded-lg shrink-0 mt-0.5"><i class="fa-solid fa-bookmark"></i></div>
+                            <div>
+                                <div class="font-bold text-slate-800">3. 冠詞選択 (un/une & le/la/l')</div>
+                                <div class="text-xs text-slate-500 mt-1">名詞につく不定冠詞・定冠詞を判定</div>
+                            </div>
+                        </button>
+                        <button type="button" onclick="selectMode('number')" class="mode-btn border-2 border-slate-200 p-4 rounded-xl text-left hover:border-indigo-400 transition flex items-start gap-3" data-mode="number">
+                            <div class="bg-slate-100 text-slate-600 p-2.5 rounded-lg shrink-0 mt-0.5"><i class="fa-solid fa-hashtag"></i></div>
+                            <div>
+                                <div class="font-bold text-slate-800">4. 数字スペル問題 (記述入力)</div>
+                                <div class="text-xs text-slate-500 mt-1">1〜100, 200, 1000, 2000のスペルから数字を手入力</div>
+                            </div>
+                        </button>
+                        <button type="button" onclick="selectMode('fr-ja-text')" class="mode-btn border-2 border-slate-200 p-4 rounded-xl text-left hover:border-indigo-400 transition flex items-start gap-3" data-mode="fr-ja-text">
+                            <div class="bg-slate-100 text-slate-600 p-2.5 rounded-lg shrink-0 mt-0.5"><i class="fa-solid fa-pen"></i></div>
+                            <div>
+                                <div class="font-bold text-slate-800">5. フランス語 → 日本語 (記述入力)</div>
+                                <div class="text-xs text-slate-500 mt-1">漢字・ひらがな・カタカナどれでも回答可能</div>
+                            </div>
+                        </button>
+                        <button type="button" onclick="selectMode('mixed')" class="mode-btn border-2 border-slate-200 p-4 rounded-xl text-left hover:border-indigo-400 transition flex items-start gap-3" data-mode="mixed">
+                            <div class="bg-slate-100 text-slate-600 p-2.5 rounded-lg shrink-0 mt-0.5"><i class="fa-solid fa-shuffle"></i></div>
+                            <div>
+                                <div class="font-bold text-slate-800">6. 総合問題（ミックス）</div>
+                                <div class="text-xs text-slate-500 mt-1">全形式（選択・記述）からランダム出題</div>
+                            </div>
+                        </button>
+                        <!-- Special Retry Mode -->
+                        <button type="button" onclick="selectMode('retry-last')" id="retry-last-mode-btn" class="mode-btn border-2 border-rose-200 bg-rose-50/40 p-4 rounded-xl text-left hover:border-rose-400 transition flex items-start gap-3 md:col-span-2 disabled:opacity-50" data-mode="retry-last">
+                            <div class="bg-rose-500 text-white p-2.5 rounded-lg shrink-0 mt-0.5"><i class="fa-solid fa-rotate-left"></i></div>
+                            <div>
+                                <div class="font-bold text-slate-800">7. 直近の間違えた問題のみ再挑戦 (<span id="last-wrong-count-text">0</span>問)</div>
+                                <div class="text-xs text-slate-500 mt-1">前回のテストで不正解だった問題だけを集中復習</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Option Count Selection -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-3"><i class="fa-solid fa-list-check text-indigo-500 mr-2"></i>回答選択肢の数（選択問題）</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="option-count-selector">
+                        <button type="button" onclick="selectOptionCount(4)" class="opt-count-btn border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:border-indigo-400 transition text-center" data-optcount="4">4択</button>
+                        <button type="button" onclick="selectOptionCount(6)" class="opt-count-btn border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-bold py-3 rounded-xl hover:border-indigo-600 transition text-center" data-optcount="6">6択 <span class="text-xs font-normal text-indigo-500">(おすすめ)</span></button>
+                        <button type="button" onclick="selectOptionCount(8)" class="opt-count-btn border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:border-indigo-400 transition text-center" data-optcount="8">8択</button>
+                        <button type="button" onclick="selectOptionCount(10)" class="opt-count-btn border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:border-indigo-400 transition text-center" data-optcount="10">10択 <span class="text-xs font-normal text-slate-400">(高難易度)</span></button>
+                    </div>
+                </div>
+
+                <!-- Question Count Selection -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-3"><i class="fa-solid fa-list-ol text-indigo-500 mr-2"></i>出題数を選択</label>
+                    <div class="grid grid-cols-4 gap-3" id="count-selector">
+                        <button type="button" onclick="selectCount(10)" class="count-btn border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-bold py-3 rounded-xl hover:border-indigo-600 transition text-center" data-count="10">10問</button>
+                        <button type="button" onclick="selectCount(20)" class="count-btn border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:border-indigo-400 transition text-center" data-count="20">20問</button>
+                        <button type="button" onclick="selectCount(50)" class="count-btn border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:border-indigo-400 transition text-center" data-count="50">50問</button>
+                        <button type="button" onclick="selectCount('all')" class="count-btn border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:border-indigo-400 transition text-center" data-count="all">全問</button>
+                    </div>
+                </div>
+
+                <!-- Start Button -->
+                <div class="pt-4">
+                    <button onclick="startQuiz()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition transform active:scale-95 flex items-center justify-center gap-2 text-lg">
+                        <i class="fa-solid fa-play"></i> テストを開始する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quiz Screen -->
+    <section id="quiz-screen" class="hidden bg-white rounded-2xl shadow-xl p-6 md:p-8">
+        <!-- Progress & Meta -->
+        <div class="mb-6">
+            <div class="flex justify-between items-center text-sm font-semibold text-slate-500 mb-2">
+                <span id="quiz-type-badge" class="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-1 rounded-md">モード</span>
+                <span>問題 <span id="current-q-num" class="text-indigo-600 font-bold">1</span> / <span id="total-q-num">10</span></span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="bg-slate-50 rounded-2xl p-6 md:p-8 mb-6 text-center border border-slate-100 shadow-inner">
+            <p id="question-subtext" class="text-xs font-semibold text-indigo-600 tracking-wider uppercase mb-1">次の問いに答えなさい</p>
+            <div id="question-text" class="text-2xl md:text-4xl font-black text-slate-900 my-3 leading-tight french-font">---</div>
+            <div id="question-hint" class="text-xs text-slate-400 font-medium h-4"></div>
+        </div>
+
+        <!-- Options / Answer Area -->
+        <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+            <!-- Options JS generated -->
+        </div>
+
+        <!-- Feedback Area -->
+        <div id="feedback-card" class="hidden rounded-xl p-4 mb-6 border transition-all flex items-start gap-3">
+            <div id="feedback-icon" class="text-2xl shrink-0 mt-0.5"></div>
+            <div>
+                <div id="feedback-title" class="font-bold text-base"></div>
+                <div id="feedback-detail" class="text-sm mt-1 text-slate-600"></div>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="flex justify-end">
+            <button id="next-btn" onclick="nextQuestion()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow transition items-center gap-2">
+                次の問題へ <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- Result Screen -->
+    <section id="result-screen" class="hidden bg-white rounded-2xl shadow-xl p-6 md:p-8">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full text-3xl font-black mb-4">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-slate-900">テスト結果</h2>
+            <p class="text-slate-500 text-sm mt-1">お疲れ様でした！あなたのスコアです</p>
+        </div>
+
+        <!-- Score Display -->
+        <div class="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-2xl p-6 text-center mb-8 shadow-lg">
+            <div class="text-xs text-indigo-200 uppercase font-bold tracking-widest mb-1">Score</div>
+            <div class="text-5xl md:text-6xl font-black my-2">
+                <span id="final-score">0</span> <span class="text-2xl font-normal text-indigo-200">/ <span id="final-total">0</span></span>
+            </div>
+            <div class="text-lg font-bold text-indigo-100 mt-2">
+                正答率: <span id="final-accuracy" class="text-yellow-300 font-extrabold text-2xl">0%</span>
+            </div>
+        </div>
+
+        <!-- Advice Card -->
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8">
+            <div class="flex items-center gap-2 text-amber-800 font-bold mb-2 text-lg">
+                <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                <span>あなたへアドバイス</span>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-baseline gap-3 border-b border-amber-200/60 pb-2">
+                    <span class="text-xs font-bold uppercase text-amber-600 bg-amber-100 px-2 py-0.5 rounded">四字熟語</span>
+                    <span id="advice-kanji" class="font-extrabold text-xl text-slate-800">---</span>
+                </div>
+                <div class="flex items-baseline gap-3 border-b border-amber-200/60 pb-2">
+                    <span class="text-xs font-bold uppercase text-amber-600 bg-amber-100 px-2 py-0.5 rounded">ことわざ</span>
+                    <span id="advice-proverb" class="font-bold text-base text-slate-800">---</span>
+                </div>
+                <div>
+                    <div class="text-xs font-bold text-amber-700 mb-1">【アドバイスメッセージ】</div>
+                    <p id="advice-message" class="text-sm text-slate-700 leading-relaxed">---</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wrong Questions Review -->
+        <div id="review-container" class="mb-8">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-circle-xmark text-rose-500"></i> 間違えた問題の復習 (<span id="review-count">0</span>問)
+                </h3>
+                <button id="quick-retry-wrong-btn" onclick="retryOnlyWrong()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> 間違えた問題のみ今すぐ再挑戦
+                </button>
+            </div>
+            <div id="review-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                <!-- Review JS generated -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3">
+            <button onclick="retryQuiz()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> もう一度同じ条件で挑戦
+            </button>
+            <button onclick="goToHome()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-gear"></i> 設定・モードを変更
+            </button>
+        </div>
+    </section>
+</main>
+
+<!-- Modal: Learning History -->
+<div id="history-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> 学習履歴 & 分野別最高成績
+            </h3>
+            <button onclick="toggleHistoryModal(false)" class="text-slate-400 hover:text-slate-600 p-1 text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-5 overflow-y-auto space-y-6">
+            <div>
+                <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3">本日の分野別最高成績</h4>
+                <div id="modal-today-bests" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <!-- JS injected -->
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">過去の挑戦履歴 (直近50件)</h4>
+                    <button onclick="clearHistory()" class="text-xs text-rose-500 hover:underline font-medium">履歴クリア</button>
+                </div>
+                <div id="history-list-container" class="space-y-2">
+                    <!-- JS injected -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Weak Points List -->
+<div id="weak-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-amber-50">
+            <h3 class="font-extrabold text-amber-900 text-lg flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> 苦手単語・数字リスト (2回以上ミス)
+            </h3>
+            <button onclick="toggleWeakModal(false)" class="text-slate-400 hover:text-slate-600 p-1 text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-5 overflow-y-auto space-y-4">
+            <div class="flex justify-between items-center text-xs text-slate-500">
+                <span>登録数: <strong id="weak-modal-count" class="text-amber-600 font-bold">0</strong> 件</span>
+                <button onclick="resetAllWeakPoints()" class="text-rose-500 hover:underline">苦手リストを全リセット</button>
+            </div>
+            <div id="weak-items-list" class="space-y-2">
+                <!-- JS injected -->
+            </div>
+        </div>
+        <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+            <button onclick="startWeakPointsQuiz()" id="weak-modal-start-btn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow transition">
+                苦手克服モードを開始する
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Dialog Modal -->
+<div id="custom-dialog-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center space-y-4">
+        <div id="custom-dialog-icon" class="text-4xl text-indigo-600">
+            <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <p id="custom-dialog-message" class="text-slate-800 font-bold text-base">メッセージ</p>
+        <div class="flex justify-center gap-3 pt-2">
+            <button id="custom-dialog-cancel" class="hidden px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition">
+                キャンセル
+            </button>
+            <button id="custom-dialog-ok" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow transition">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Raw Vocabulary Data
+const rawVocab = [
+    { id: 1, fr: "bonjour", ja: "こんにちは、おはよう", kana: "こんにちは おはよう", gender: null, articleEligible: false },
+    { id: 2, fr: "bonne journée", ja: "良い一日を", kana: "よいいちにちを", gender: null, articleEligible: false },
+    { id: 3, fr: "bonsoir", ja: "こんばんは", kana: "こんばんは", gender: null, articleEligible: false },
+    { id: 4, fr: "bonne nuit", ja: "おやすみなさい", kana: "おやすみなさい", gender: null, articleEligible: false },
+    { id: 5, fr: "au revoir", ja: "さようなら", kana: "さようなら", gender: null, articleEligible: false },
+    { id: 6, fr: "merci", ja: "ありがとう", kana: "ありがとう", gender: null, articleEligible: false },
+    { id: 7, fr: "s'il vous plaît", ja: "お願いします", kana: "おねがいします", gender: null, articleEligible: false },
+    { id: 8, fr: "oui", ja: "はい", kana: "はい", gender: null, articleEligible: false },
+    { id: 9, fr: "non", ja: "いいえ", kana: "いいえ", gender: null, articleEligible: false },
+    { id: 10, fr: "pardon", ja: "すみません、ごめんなさい", kana: "すみません ごめんなさい", gender: null, articleEligible: false },
+    { id: 11, fr: "à bientôt", ja: "またね、また近いうちに", kana: "またね", gender: null, articleEligible: false },
+    { id: 12, fr: "enchanté", ja: "はじめまして", kana: "はじめまして", gender: null, articleEligible: false },
+    { id: 13, fr: "livre", ja: "本", kana: "ほん", gender: "m", articleEligible: true },
+    { id: 14, fr: "stylo", ja: "ペン", kana: "ぺん", gender: "m", articleEligible: true },
+    { id: 15, fr: "cahier", ja: "ノート", kana: "のーと", gender: "m", articleEligible: true },
+    { id: 16, fr: "maison", ja: "家、住宅", kana: "いえ", gender: "f", articleEligible: true },
+    { id: 17, fr: "voiture", ja: "車", kana: "くるま", gender: "f", articleEligible: true },
+    { id: 18, fr: "pomme", ja: "りんご", kana: "りんご", gender: "f", articleEligible: true },
+    { id: 19, fr: "café", ja: "コーヒー、喫茶店", kana: "こーひー", gender: "m", articleEligible: true },
+    { id: 20, fr: "pain", ja: "パン", kana: "ぱん", gender: "m", articleEligible: true },
+    { id: 21, fr: "eau", ja: "水", kana: "みず", gender: "f", articleEligible: true },
+    { id: 22, fr: "étudiant", ja: "学生（男性）", kana: "がくせい", gender: "m", articleEligible: true },
+    { id: 23, fr: "école", ja: "学校", kana: "がっこう", gender: "f", articleEligible: true },
+    { id: 24, fr: "ami", ja: "友達（男性）", kana: "ともだち", gender: "m", articleEligible: true },
+    { id: 25, fr: "amie", ja: "友達（女性）", kana: "ともだち", gender: "f", articleEligible: true },
+    { id: 26, fr: "fleur", ja: "花", kana: "はな", gender: "f", articleEligible: true },
+    { id: 27, fr: "soleil", ja: "太陽", kana: "たいよう", gender: "m", articleEligible: true },
+    { id: 28, fr: "lune", ja: "月", kana: "つき", gender: "f", articleEligible: true },
+    { id: 29, fr: "table", ja: "テーブル、机", kana: "てーぶる つくえ", gender: "f", articleEligible: true },
+    { id: 30, fr: "chaise", ja: "椅子", kana: "いす", gender: "f", articleEligible: true },
+    { id: 31, fr: "porte", ja: "ドア、扉", kana: "どあ とびら", gender: "f", articleEligible: true },
+    { id: 32, fr: "fenêtre", ja: "窓", kana: "まど", gender: "f", articleEligible: true },
+    { id: 33, fr: "garçon", ja: "男の子、少年", kana: "おとのこ しょうねん", gender: "m", articleEligible: true },
+    { id: 34, fr: "fille", ja: "女の子、娘", kana: "おんなのこ むすめ", gender: "f", articleEligible: true },
+    { id: 35, fr: "homme", ja: "男性、男の人", kana: "だんせい おとこのひと", gender: "m", articleEligible: true },
+    { id: 36, fr: "femme", ja: "女性、女の人、妻", kana: "じょせい おんなのひと つま", gender: "f", articleEligible: true },
+    { id: 37, fr: "chien", ja: "犬", kana: "いぬ", gender: "m", articleEligible: true },
+    { id: 38, fr: "chat", ja: "猫", kana: "ねこ", gender: "m", articleEligible: true }
+];
+
+// Raw Numbers Data
+const rawNumbers = [
+    { num: 1, spell: "un" }, { num: 2, spell: "deux" }, { num: 3, spell: "trois" }, { num: 4, spell: "quatre" },
+    { num: 5, spell: "cinq" }, { num: 6, spell: "six" }, { num: 7, spell: "sept" }, { num: 8, spell: "huit" },
+    { num: 9, spell: "neuf" }, { num: 10, spell: "dix" }, { num: 11, spell: "onze" }, { num: 12, spell: "douze" },
+    { num: 13, spell: "treize" }, { num: 14, spell: "quatorze" }, { num: 15, spell: "quinze" }, { num: 16, spell: "seize" },
+    { num: 17, spell: "dix-sept" }, { num: 18, spell: "dix-huit" }, { num: 19, spell: "dix-neuf" }, { num: 20, spell: "vingt" },
+    { num: 30, spell: "trente" }, { num: 40, spell: "quarante" }, { num: 50, spell: "cinquante" }, { num: 60, spell: "soixante" },
+    { num: 70, spell: "soixante-dix" }, { num: 80, spell: "quatre-vingts" }, { num: 90, spell: "quatre-vingt-dix" },
+    { num: 100, spell: "cent" }, { num: 200, spell: "deux cents" }, { num: 1000, spell: "mille" }, { num: 2000, spell: "deux mille" }
+];
+
+// Global App State
+let appState = {
+    mode: 'fr-ja',
+    optionCount: 6,
+    questionCount: 10,
+    questions: [],
+    currentIndex: 0,
+    score: 0,
+    userAnswers: [],
+    lastWrongQuestions: [],
+    weakPoints: JSON.parse(localStorage.getItem('fr_quiz_weak_points') || '{}'),
+    history: JSON.parse(localStorage.getItem('fr_quiz_history') || '[]')
+};
+
+// Mode Labels Map
+const modeNames = {
+    'fr-ja': '仏 → 日選択',
+    'ja-fr': '日 → 仏選択',
+    'article': '冠詞選択',
+    'number': '数字スペル記述',
+    'fr-ja-text': '仏 → 日記述',
+    'mixed': '総合ミックス',
+    'retry-last': '直近の復習',
+    'weak-points': '苦手克服モード'
+};
+
+// Initialize app on load
+document.addEventListener('DOMContentLoaded', () => {
+    updateDashboard();
+});
+
+// Show Custom Dialog (Replaces alert & confirm)
+function showCustomDialog(message, onOk = null, showCancel = false, onCancel = null) {
+    const modal = document.getElementById('custom-dialog-modal');
+    const msgEl = document.getElementById('custom-dialog-message');
+    const okBtn = document.getElementById('custom-dialog-ok');
+    const cancelBtn = document.getElementById('custom-dialog-cancel');
+
+    msgEl.textContent = message;
+    cancelBtn.classList.toggle('hidden', !showCancel);
+
+    const cleanup = () => {
+        modal.classList.add('hidden');
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+    };
+
+    okBtn.onclick = () => {
+        cleanup();
+        if (onOk) onOk();
+    };
+
+    cancelBtn.onclick = () => {
+        cleanup();
+        if (onCancel) onCancel();
+    };
+
+    modal.classList.remove('hidden');
+}
+
+// Option & Mode selection handlers
+function selectMode(mode) {
+    appState.mode = mode;
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        const isSelected = btn.dataset.mode === mode;
+        btn.classList.toggle('border-indigo-600', isSelected);
+        btn.classList.toggle('bg-indigo-50/50', isSelected);
+        btn.classList.toggle('border-slate-200', !isSelected && btn.id !== 'retry-last-mode-btn');
+    });
+}
+
+function selectOptionCount(count) {
+    appState.optionCount = count;
+    document.querySelectorAll('.opt-count-btn').forEach(btn => {
+        const isSelected = parseInt(btn.dataset.optcount) === count;
+        btn.classList.toggle('border-indigo-600', isSelected);
+        btn.classList.toggle('bg-indigo-50', isSelected);
+        btn.classList.toggle('text-indigo-700', isSelected);
+        btn.classList.toggle('border-slate-200', !isSelected);
+    });
+}
+
+function selectCount(count) {
+    appState.questionCount = count;
+    document.querySelectorAll('.count-btn').forEach(btn => {
+        const isSelected = btn.dataset.count === String(count);
+        btn.classList.toggle('border-indigo-600', isSelected);
+        btn.classList.toggle('bg-indigo-50', isSelected);
+        btn.classList.toggle('text-indigo-700', isSelected);
+        btn.classList.toggle('border-slate-200', !isSelected);
+    });
+}
+
+function goToHome() {
+    document.getElementById('config-screen').classList.remove('hidden');
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.add('hidden');
+    document.getElementById('home-btn').classList.add('hidden');
+    updateDashboard();
+}
+
+function updateDashboard() {
+    // Update weak counts
+    const weakKeys = Object.keys(appState.weakPoints).filter(k => appState.weakPoints[k] >= 2);
+    document.getElementById('weak-count-badge').textContent = weakKeys.length;
+    document.getElementById('weak-start-btn').disabled = weakKeys.length === 0;
+    
+    // Update last wrong count
+    const lastWrongCount = appState.lastWrongQuestions.length;
+    document.getElementById('last-wrong-count-text').textContent = lastWrongCount;
+    document.getElementById('retry-last-mode-btn').disabled = lastWrongCount === 0;
+
+    // Render today's best summary
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayLogs = appState.history.filter(h => h.date.startsWith(todayStr));
+    
+    const modes = ['fr-ja', 'ja-fr', 'article', 'number', 'fr-ja-text', 'mixed'];
+    const container = document.getElementById('today-bests-container');
+    container.innerHTML = '';
+
+    modes.forEach(m => {
+        const mLogs = todayLogs.filter(l => l.mode === m);
+        const maxScore = mLogs.length > 0 ? Math.max(...mLogs.map(l => l.accuracy)) : null;
+        
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 border border-slate-200/60 rounded-xl p-2.5 text-center";
+        card.innerHTML = `
+            <div class="text-[10px] font-bold text-slate-400 truncate">${modeNames[m]}</div>
+            <div class="text-sm font-extrabold ${maxScore !== null ? 'text-indigo-600' : 'text-slate-300'}">
+                ${maxScore !== null ? maxScore + '%' : '未挑戦'}
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function startQuiz() {
+    if (appState.mode === 'retry-last' && appState.lastWrongQuestions.length === 0) {
+        showCustomDialog("直近の間違えた問題がありません。");
+        return;
+    }
+
+    let rawPool = [];
+
+    if (appState.mode === 'retry-last') {
+        appState.questions = [...appState.lastWrongQuestions];
+    } else if (appState.mode === 'weak-points') {
+        const weakKeys = Object.keys(appState.weakPoints).filter(k => appState.weakPoints[k] >= 2);
+        if (weakKeys.length === 0) {
+            showCustomDialog("苦手登録された問題がありません。");
+            return;
+        }
+        appState.questions = weakKeys.map(key => {
+            if (key.startsWith('vocab_')) {
+                const item = rawVocab.find(v => v.id === parseInt(key.replace('vocab_', '')));
+                return { type: 'fr-ja', data: item };
+            } else {
+                const item = rawNumbers.find(n => n.num === parseInt(key.replace('num_', '')));
+                return { type: 'number', data: item };
+            }
+        });
+    } else {
+        // Build question array based on selected mode
+        if (appState.mode === 'number') {
+            rawPool = rawNumbers.map(n => ({ type: 'number', data: n }));
+        } else if (appState.mode === 'article') {
+            rawPool = rawVocab.filter(v => v.articleEligible).map(v => ({ type: 'article', data: v }));
+        } else if (appState.mode === 'mixed') {
+            const vPool = rawVocab.map(v => ({ type: ['fr-ja', 'ja-fr', 'fr-ja-text', 'article'][Math.floor(Math.random() * 4)], data: v }));
+            const nPool = rawNumbers.map(n => ({ type: 'number', data: n }));
+            rawPool = [...vPool, ...nPool];
+        } else {
+            rawPool = rawVocab.map(v => ({ type: appState.mode, data: v }));
+        }
+
+        // Shuffle pool
+        rawPool.sort(() => Math.random() - 0.5);
+
+        // Slice questions
+        const targetCount = appState.questionCount === 'all' ? rawPool.length : Math.min(parseInt(appState.questionCount), rawPool.length);
+        appState.questions = rawPool.slice(0, targetCount);
+    }
+
+    appState.currentIndex = 0;
+    appState.score = 0;
+    appState.userAnswers = [];
+
+    // Switch screens
+    document.getElementById('config-screen').classList.add('hidden');
+    document.getElementById('quiz-screen').classList.remove('hidden');
+    document.getElementById('home-btn').classList.remove('hidden');
+
+    renderQuestion();
+}
+
+function startWeakPointsQuiz() {
+    selectMode('weak-points');
+    toggleWeakModal(false);
+    startQuiz();
+}
+
+function renderQuestion() {
+    const q = appState.questions[appState.currentIndex];
+    const total = appState.questions.length;
+    
+    document.getElementById('current-q-num').textContent = appState.currentIndex + 1;
+    document.getElementById('total-q-num').textContent = total;
+    document.getElementById('progress-bar').style.width = `${((appState.currentIndex) / total) * 100}%`;
+    document.getElementById('quiz-type-badge').textContent = modeNames[q.type] || '単語テスト';
+
+    // Hide feedback & next button
+    document.getElementById('feedback-card').classList.add('hidden');
+    document.getElementById('next-btn').classList.add('hidden');
+
+    const subtext = document.getElementById('question-subtext');
+    const qText = document.getElementById('question-text');
+    const hint = document.getElementById('question-hint');
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+
+    if (q.type === 'fr-ja' || q.type === 'fr-ja-text') {
+        subtext.textContent = "次のフランス語の日本語訳を答えなさい";
+        qText.textContent = q.data.fr;
+        hint.textContent = q.data.gender ? `(名詞: ${q.data.gender === 'm' ? '男性' : '女性'})` : '';
+    } else if (q.type === 'ja-fr') {
+        subtext.textContent = "次の日本語に合うフランス語を選択しなさい";
+        qText.textContent = q.data.ja;
+        hint.textContent = '';
+    } else if (q.type === 'article') {
+        subtext.textContent = "次の単語に付く正しい冠詞を選択しなさい";
+        qText.textContent = q.data.fr;
+        hint.textContent = `意味: ${q.data.ja}`;
+    } else if (q.type === 'number') {
+        subtext.textContent = "次のスペルの数字を「数字（半角）」で入力しなさい";
+        qText.textContent = q.data.spell;
+        hint.textContent = "例: dix → 10";
+    }
+
+    // Render Choice vs Text Input
+    if (q.type === 'fr-ja-text' || q.type === 'number') {
+        container.className = "flex flex-col gap-3 mb-6";
+        container.innerHTML = `
+            <div class="flex gap-2">
+                <input type="text" id="text-answer-input" placeholder="回答を入力してください" 
+                    class="flex-1 border-2 border-slate-300 focus:border-indigo-600 rounded-xl px-4 py-3 outline-none text-lg font-bold"
+                    onkeydown="if(event.key==='Enter') submitTextAnswer()">
+                <button onclick="submitTextAnswer()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition">
+                    回答
+                </button>
+            </div>
+        `;
+        setTimeout(() => document.getElementById('text-answer-input')?.focus(), 100);
+    } else if (q.type === 'article') {
+        container.className = "grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6";
+        const options = ['un', 'une', 'le', 'la', 'l\''];
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "opt-choice-btn border-2 border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/50 p-4 rounded-xl font-bold text-lg text-slate-800 transition text-center";
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(opt);
+            container.appendChild(btn);
+        });
+    } else {
+        container.className = "grid grid-cols-1 md:grid-cols-2 gap-3 mb-6";
+        const choices = generateChoices(q);
+        choices.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "opt-choice-btn border-2 border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/50 p-4 rounded-xl font-bold text-base text-slate-800 transition text-left flex items-center justify-between";
+            btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-slate-300"></i>`;
+            btn.onclick = () => checkAnswer(opt);
+            container.appendChild(btn);
+        });
+    }
+}
+
+function generateChoices(q) {
+    const isFrJa = q.type === 'fr-ja';
+    const correctChoice = isFrJa ? q.data.ja : q.data.fr;
+    
+    let wrongPool = rawVocab.filter(v => v.id !== q.data.id).map(v => isFrJa ? v.ja : v.fr);
+    wrongPool.sort(() => Math.random() - 0.5);
+
+    const needed = Math.min(appState.optionCount - 1, wrongPool.length);
+    const choices = [correctChoice, ...wrongPool.slice(0, needed)];
+    choices.sort(() => Math.random() - 0.5);
+    return choices;
+}
+
+function submitTextAnswer() {
+    const inputEl = document.getElementById('text-answer-input');
+    if (!inputEl) return;
+    checkAnswer(inputEl.value.trim());
+}
+
+function checkAnswer(userChoice) {
+    const q = appState.questions[appState.currentIndex];
+    let isCorrect = false;
+    let correctAnswerStr = "";
+    const key = q.data.id ? `vocab_${q.data.id}` : `num_${q.data.num}`;
+
+    if (q.type === 'fr-ja') {
+        isCorrect = userChoice === q.data.ja;
+        correctAnswerStr = q.data.ja;
+    } else if (q.type === 'ja-fr') {
+        isCorrect = userChoice === q.data.fr;
+        correctAnswerStr = q.data.fr;
+    } else if (q.type === 'article') {
+        let validArticles = [];
+        if (q.data.gender === 'm') validArticles = ['un', q.data.fr.match(/^[aeiouyéèêà]/i) ? "l'" : "le"];
+        if (q.data.gender === 'f') validArticles = ['une', q.data.fr.match(/^[aeiouyéèêà]/i) ? "l'" : "la"];
+        isCorrect = validArticles.includes(userChoice.toLowerCase());
+        correctAnswerStr = validArticles.join(" または ");
+    } else if (q.type === 'number') {
+        isCorrect = userChoice === String(q.data.num);
+        correctAnswerStr = String(q.data.num);
+    } else if (q.type === 'fr-ja-text') {
+        const cleanUser = userChoice.replace(/\s+/g, '').toLowerCase();
+        const cleanJa = q.data.ja.replace(/\s+/g, '').toLowerCase();
+        const cleanKana = (q.data.kana || '').replace(/\s+/g, '').toLowerCase();
+        isCorrect = cleanUser !== "" && (cleanJa.includes(cleanUser) || cleanKana.includes(cleanUser));
+        correctAnswerStr = `${q.data.ja} (${q.data.kana || ''})`;
+    }
+
+    // Update state & weak score
+    if (isCorrect) {
+        appState.score++;
+        if (appState.weakPoints[key]) {
+            appState.weakPoints[key] = Math.max(0, appState.weakPoints[key] - 1);
+        }
+    } else {
+        appState.weakPoints[key] = (appState.weakPoints[key] || 0) + 1;
+    }
+    localStorage.setItem('fr_quiz_weak_points', JSON.stringify(appState.weakPoints));
+
+    appState.userAnswers.push({ question: q, userChoice, isCorrect, correctAnswerStr });
+
+    // Disable choices
+    document.querySelectorAll('.opt-choice-btn, #text-answer-input, #options-container button').forEach(el => {
+        el.disabled = true;
+        el.classList.add('opacity-70', 'cursor-not-allowed');
+    });
+
+    // Show Feedback
+    const fbCard = document.getElementById('feedback-card');
+    const fbIcon = document.getElementById('feedback-icon');
+    const fbTitle = document.getElementById('feedback-title');
+    const fbDetail = document.getElementById('feedback-detail');
+
+    fbCard.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-rose-50', 'border-rose-200');
+    if (isCorrect) {
+        fbCard.classList.add('bg-emerald-50', 'border-emerald-200');
+        fbIcon.className = "fa-solid fa-circle-check text-emerald-600 text-2xl";
+        fbTitle.className = "font-bold text-base text-emerald-900";
+        fbTitle.textContent = "正解です！ Bravo !";
+        fbDetail.textContent = `正解: ${correctAnswerStr}`;
+    } else {
+        fbCard.classList.add('bg-rose-50', 'border-rose-200');
+        fbIcon.className = "fa-solid fa-circle-xmark text-rose-600 text-2xl";
+        fbTitle.className = "font-bold text-base text-rose-900";
+        fbTitle.textContent = "不正解...";
+        fbDetail.textContent = `あなたの回答: ${userChoice || '（未入力）'} / 正解: ${correctAnswerStr}`;
+    }
+
+    document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+    appState.currentIndex++;
+    if (appState.currentIndex < appState.questions.length) {
+        renderQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.remove('hidden');
+
+    const total = appState.questions.length;
+    const score = appState.score;
+    const accuracy = Math.round((score / total) * 100);
+
+    document.getElementById('final-score').textContent = score;
+    document.getElementById('final-total').textContent = total;
+    document.getElementById('final-accuracy').textContent = `${accuracy}%`;
+
+    // Save wrong questions for quick retry
+    appState.lastWrongQuestions = appState.userAnswers.filter(a => !a.isCorrect).map(a => a.question);
+
+    // Save to History
+    const log = {
+        date: new Date().toISOString(),
+        mode: appState.mode,
+        score,
+        total,
+        accuracy
+    };
+    appState.history.unshift(log);
+    if (appState.history.length > 50) appState.history.pop();
+    localStorage.setItem('fr_quiz_history', JSON.stringify(appState.history));
+
+    // Advice Logic (Four-character idiom, Proverb, Message)
+    let kanji = "", proverb = "", message = "";
+    if (accuracy === 100) {
+        kanji = "完全無欠（かんぜんむけつ）";
+        proverb = "継続は力なり (La pugnacité porte ses fruits)";
+        message = "素晴らしい！満点達成です。完璧な単語力と数字の正確性を持っています。この調子で維持していきましょう！";
+    } else if (accuracy >= 80) {
+        kanji = "切磋琢磨（せっさたくま）";
+        proverb = "七転び八起き (Tomber sept fois, se relever huit)";
+        message = "非常に優れた成績です！惜しくも逃した問題を復習すれば、次は満点間違いなしです。";
+    } else if (accuracy >= 50) {
+        kanji = "試行錯誤（しこうさくご）";
+        proverb = "雨降って地固まる (Après la pluie, le beau temps)";
+        message = "基礎力は身についています。間違えた問題を「苦手リスト」で重点的に復習してスコアアップを目指しましょう。";
+    } else {
+        kanji = "百折不撓（ひゃくせつふとう）";
+        proverb = "千里の道も一歩から (Un voyage de mille lieues commence par un pas)";
+        message = "焦らず少しずつ覚えていきましょう！出題数を10問に絞って何度も反復するのがコツです。";
+    }
+
+    document.getElementById('advice-kanji').textContent = kanji;
+    document.getElementById('advice-proverb').textContent = proverb;
+    document.getElementById('advice-message').textContent = message;
+
+    // Review List
+    const wrongAnswers = appState.userAnswers.filter(a => !a.isCorrect);
+    const reviewContainer = document.getElementById('review-container');
+    const reviewList = document.getElementById('review-list');
+    document.getElementById('review-count').textContent = wrongAnswers.length;
+
+    if (wrongAnswers.length === 0) {
+        reviewContainer.classList.add('hidden');
+    } else {
+        reviewContainer.classList.remove('hidden');
+        reviewList.innerHTML = '';
+        wrongAnswers.forEach(ans => {
+            const item = document.createElement('div');
+            item.className = "bg-rose-50/60 border border-rose-100 rounded-xl p-3 flex justify-between items-center text-sm";
+            const qStr = ans.question.data.fr || ans.question.data.spell || ans.question.data.ja;
+            item.innerHTML = `
+                <div>
+                    <span class="font-bold text-slate-800">${qStr}</span>
+                    <span class="text-xs text-rose-600 ml-2">あなたの回答: ${ans.userChoice || 'なし'}</span>
+                </div>
+                <div class="font-bold text-emerald-700 text-xs bg-emerald-100 px-2.5 py-1 rounded-md">
+                    正解: ${ans.correctAnswerStr}
+                </div>
+            `;
+            reviewList.appendChild(item);
+        });
+    }
+
+    updateDashboard();
+}
+
+function retryQuiz() {
+    startQuiz();
+}
+
+function retryOnlyWrong() {
+    if (appState.lastWrongQuestions.length === 0) {
+        showCustomDialog("間違えた問題はありません！");
+        return;
+    }
+    selectMode('retry-last');
+    startQuiz();
+}
+
+function toggleHistoryModal(show) {
+    const modal = document.getElementById('history-modal');
+    if (show) {
+        renderHistoryModalDetails();
+        modal.classList.remove('hidden');
+    } else {
+        modal.classList.add('hidden');
+    }
+}
+
+function renderHistoryModalDetails() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayLogs = appState.history.filter(h => h.date.startsWith(todayStr));
+    const modes = ['fr-ja', 'ja-fr', 'article', 'number', 'fr-ja-text', 'mixed'];
+    
+    const bestsContainer = document.getElementById('modal-today-bests');
+    bestsContainer.innerHTML = '';
+
+    modes.forEach(m => {
+        const mLogs = todayLogs.filter(l => l.mode === m);
+        const maxScore = mLogs.length > 0 ? Math.max(...mLogs.map(l => l.accuracy)) : null;
+        
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 border border-slate-200 rounded-xl p-3 text-center";
+        card.innerHTML = `
+            <div class="text-xs font-bold text-slate-500 truncate">${modeNames[m]}</div>
+            <div class="text-lg font-black ${maxScore !== null ? 'text-indigo-600' : 'text-slate-300'}">
+                ${maxScore !== null ? maxScore + '%' : '記録なし'}
+            </div>
+        `;
+        bestsContainer.appendChild(card);
+    });
+
+    const listContainer = document.getElementById('history-list-container');
+    listContainer.innerHTML = '';
+    
+    if (appState.history.length === 0) {
+        listContainer.innerHTML = `<div class="text-center text-slate-400 py-6 text-sm">学習履歴はまだありません</div>`;
+        return;
+    }
+
+    appState.history.forEach(log => {
+        const dateObj = new Date(log.date);
+        const dateFormatted = `${dateObj.getMonth() + 1}/${dateObj.getDate()} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+        
+        const row = document.createElement('div');
+        row.className = "bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-center text-xs";
+        row.innerHTML = `
+            <div class="flex items-center gap-2">
+                <span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded">${modeNames[log.mode] || log.mode}</span>
+                <span class="text-slate-400">${dateFormatted}</span>
+            </div>
+            <div class="font-bold text-slate-700">
+                ${log.score} / ${log.total} <span class="text-indigo-600 font-extrabold ml-1">(${log.accuracy}%)</span>
+            </div>
+        `;
+        listContainer.appendChild(row);
+    });
+}
+
+function clearHistory() {
+    showCustomDialog("学習履歴を消去してもよろしいですか？", () => {
+        appState.history = [];
+        localStorage.removeItem('fr_quiz_history');
+        renderHistoryModalDetails();
+        updateDashboard();
+    }, true);
+}
+
+function toggleWeakModal(show) {
+    const modal = document.getElementById('weak-modal');
+    if (show) {
+        renderWeakModalDetails();
+        modal.classList.remove('hidden');
+    } else {
+        modal.classList.add('hidden');
+    }
+}
+
+function renderWeakModalDetails() {
+    const weakKeys = Object.keys(appState.weakPoints).filter(k => appState.weakPoints[k] >= 2);
+    document.getElementById('weak-modal-count').textContent = weakKeys.length;
+    document.getElementById('weak-modal-start-btn').disabled = weakKeys.length === 0;
+
+    const container = document.getElementById('weak-items-list');
+    container.innerHTML = '';
+
+    if (weakKeys.length === 0) {
+        container.innerHTML = `<div class="text-center text-slate-400 py-8 text-sm">苦手登録された問題はありません（2回以上ミスすると登録されます）</div>`;
+        return;
+    }
+
+    weakKeys.forEach(key => {
+        let label = "", sub = "", missCount = appState.weakPoints[key];
+        if (key.startsWith('vocab_')) {
+            const v = rawVocab.find(item => item.id === parseInt(key.replace('vocab_', '')));
+            if (v) {
+                label = v.fr;
+                sub = v.ja;
+            }
+        } else {
+            const n = rawNumbers.find(item => item.num === parseInt(key.replace('num_', '')));
+            if (n) {
+                label = n.spell;
+                sub = `数字: ${n.num}`;
+            }
+        }
+
+        const row = document.createElement('div');
+        row.className = "bg-amber-50/60 border border-amber-200/60 rounded-xl p-3 flex justify-between items-center text-xs";
+        row.innerHTML = `
+            <div>
+                <span class="font-bold text-slate-900 text-sm mr-2">${label}</span>
+                <span class="text-slate-500">${sub}</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">ミス: ${missCount}回</span>
+                <button onclick="removeWeakPoint('${key}')" class="text-rose-500 hover:text-rose-700 font-bold">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+function removeWeakPoint(key) {
+    delete appState.weakPoints[key];
+    localStorage.setItem('fr_quiz_weak_points', JSON.stringify(appState.weakPoints));
+    renderWeakModalDetails();
+    updateDashboard();
+}
+
+function resetAllWeakPoints() {
+    showCustomDialog("苦手リストをすべてクリアしますか？", () => {
+        appState.weakPoints = {};
+        localStorage.removeItem('fr_quiz_weak_points');
+        renderWeakModalDetails();
+        updateDashboard();
+    }, true);
+}
+</script>
+</body>
+</html>
